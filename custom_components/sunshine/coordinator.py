@@ -37,13 +37,18 @@ class SunshineDataUpdateCoordinator(DataUpdateCoordinator[dict[str, dict[str, An
     async def _async_update_data(self) -> dict[str, dict[str, Any]]:
         """Update data via API."""
         try:
-            scooters = await self.api.get_scooters()
+            scooters_list = await self.api.get_scooters()
+            if not scooters_list:
+                return {}
             
-            # Create a dictionary keyed by scooter ID for easy lookup
-            data = {}
-            for scooter in scooters:
-                data[scooter["id"]] = scooter
+            # Fetch detailed data for each scooter
+            tasks = [self.api.get_scooter(scooter["id"]) for scooter in scooters_list]
+            detailed_scooters = await asyncio.gather(*tasks)
             
-            return data
+            return {
+                scooter["id"]: scooter
+                for scooter in detailed_scooters
+                if "id" in scooter
+            }
         except Exception as err:
             raise UpdateFailed(f"Failed to fetch scooter data: {err}") from err
