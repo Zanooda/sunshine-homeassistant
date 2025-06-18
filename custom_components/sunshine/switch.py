@@ -49,8 +49,11 @@ class SunshineLockSwitch(SunshineEntity, SwitchEntity):
     def is_on(self) -> bool:
         """Return true if the scooter is locked."""
         if scooter_data := self.coordinator.data.get(self.scooter_id):
-            return scooter_data.get("locked", True)
-        return True
+            state = scooter_data.get("state")
+            if state:
+                # Following the logic from the Rails model: unlocked if state is 'parked' or 'ready-to-drive'
+                return state not in ["parked", "ready-to-drive"]
+        return True  # Default to locked if no data
     
     async def async_turn_on(self, **kwargs: Any) -> None:
         """Lock the scooter."""

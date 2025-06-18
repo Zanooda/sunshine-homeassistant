@@ -35,7 +35,7 @@ SENSOR_TYPES: list[SensorEntityDescription] = [
         icon="mdi:counter",
     ),
     SensorEntityDescription(
-        key="status",
+        key="state",
         name="Status",
         icon="mdi:information-outline",
     ),
@@ -83,14 +83,20 @@ class SunshineSensor(SunshineEntity, SensorEntity):
     def native_value(self) -> Any:
         """Return the state of the sensor."""
         if scooter_data := self.coordinator.data.get(self.scooter_id):
+            if self.entity_description.key == "battery_level":
+                if batteries := scooter_data.get("batteries"):
+                    if battery0 := batteries.get("battery0"):
+                        return battery0.get("level")
+                return None
+
             value = scooter_data.get(self.entity_description.key)
+            
             if value is None:
                 return None
             
-            # Convert odometer from meters to kilometers
             if self.entity_description.key == "odometer":
                 try:
-                    return float(value) / 1000
+                    return round(float(value) / 1000, 1)
                 except (ValueError, TypeError):
                     _LOGGER.error("Invalid odometer value: %s", value)
                     return None

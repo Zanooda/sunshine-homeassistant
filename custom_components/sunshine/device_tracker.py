@@ -54,21 +54,39 @@ class SunshineDeviceTracker(SunshineEntity, TrackerEntity):
     def latitude(self) -> float | None:
         """Return latitude value of the device."""
         if scooter_data := self.coordinator.data.get(self.scooter_id):
-            return scooter_data.get("latitude")
+            if location := scooter_data.get("location"):
+                try:
+                    lat_val = location.get("lat")
+                    if lat_val is not None:
+                        return float(lat_val)
+                except (ValueError, TypeError):
+                    _LOGGER.warning("Invalid latitude value for scooter %s: %s", self.scooter_id, location.get("lat"))
         return None
     
     @property
     def longitude(self) -> float | None:
         """Return longitude value of the device."""
         if scooter_data := self.coordinator.data.get(self.scooter_id):
-            return scooter_data.get("longitude")
+            if location := scooter_data.get("location"):
+                try:
+                    lng_val = location.get("lng")
+                    if lng_val is not None:
+                        return float(lng_val)
+                except (ValueError, TypeError):
+                    _LOGGER.warning("Invalid longitude value for scooter %s: %s", self.scooter_id, location.get("lng"))
         return None
     
     @property
     def battery_level(self) -> int | None:
         """Return the battery level of the device."""
         if scooter_data := self.coordinator.data.get(self.scooter_id):
-            return scooter_data.get("battery_level")
+            if batteries := scooter_data.get("batteries"):
+                if battery0 := batteries.get("battery0"):
+                    if (level := battery0.get("level")) is not None:
+                        try:
+                            return int(level)
+                        except (ValueError, TypeError):
+                            _LOGGER.warning("Invalid battery level for scooter %s: %s", self.scooter_id, level)
         return None
     
     @property

@@ -98,11 +98,9 @@ class SunshineSelect(SunshineEntity, SelectEntity):
     @property
     def current_option(self) -> str | None:
         """Return the selected entity option."""
-        # If the API provides current state, use it
-        if scooter := self.coordinator.data.get(self.scooter_id):
-            state_key = f"{self.entity_description.key}_state"
-            if state_key in scooter:
-                return scooter[state_key]
+        if scooter_data := self.coordinator.data.get(self.scooter_id):
+            if self.entity_description.key == "blinkers":
+                return scooter_data.get(self.entity_description.key, BLINKER_OFF)
         return self._attr_current_option
     
     async def async_select_option(self, option: str) -> None:

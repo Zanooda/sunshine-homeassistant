@@ -53,12 +53,6 @@ BUTTON_TYPES: list[SunshineButtonEntityDescription] = [
         press_fn=lambda api, scooter_id: api.ping(scooter_id),
     ),
     SunshineButtonEntityDescription(
-        key="make_noise",
-        name="Make Noise",
-        icon="mdi:volume-high",
-        press_fn=lambda api, scooter_id: api.make_noise(scooter_id),
-    ),
-    SunshineButtonEntityDescription(
         key="open_seatbox",
         name="Open Seatbox",
         icon="mdi:treasure-chest",

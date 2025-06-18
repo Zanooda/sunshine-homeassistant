@@ -70,7 +70,7 @@ class SunshineAPI:
         """Trigger alarm for specified duration."""
         return await self._request(
             "POST", 
-            f"/scooters/{scooter_id}/trigger_alarm",
+            f"/scooters/{scooter_id}/alarm",
             json={"duration": duration}
         )
     
@@ -109,7 +109,3 @@ class SunshineAPI:
     async def open_seatbox(self, scooter_id: str) -> dict[str, Any]:
         """Open the seat box/storage compartment."""
         return await self._request("POST", f"/scooters/{scooter_id}/open_seatbox")
-    
-    async def make_noise(self, scooter_id: str) -> dict[str, Any]:
-        """Make noise (possibly for finding the scooter)."""
-        return await self._request("POST", f"/scooters/{scooter_id}/noise")
