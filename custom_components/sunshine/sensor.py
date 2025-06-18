@@ -89,7 +89,11 @@ class SunshineSensor(SunshineEntity, SensorEntity):
             
             # Convert odometer from meters to kilometers
             if self.entity_description.key == "odometer":
-                return value / 1000
+                try:
+                    return float(value) / 1000
+                except (ValueError, TypeError):
+                    _LOGGER.error("Invalid odometer value: %s", value)
+                    return None
             
             return value
         return None
