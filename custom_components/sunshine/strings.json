@@ -1,0 +1,26 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Configure Sunshine Scooter",
+        "description": "Please enter your Sunshine API credentials.",
+        "data": {
+          "token": "API Token",
+          "base_url": "Base URL"
+        },
+        "data_description": {
+          "token": "Your Sunshine API bearer token. Get it from https://rescoot.org/account#new_token_form",
+          "base_url": "The base URL for the Sunshine API (default: https://rescoot.org)"
+        }
+      }
+    },
+    "error": {
+      "invalid_auth": "Invalid authentication",
+      "cannot_connect": "Failed to connect",
+      "unknown": "Unexpected error"
+    },
+    "abort": {
+      "already_configured": "Device is already configured"
+    }
+  }
+}

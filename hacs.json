@@ -1,0 +1,9 @@
+{
+  "name": "Sunshine Scooter",
+  "content_in_root": false,
+  "render_readme": true,
+  "homeassistant": "2024.1.0",
+  "country": ["US"],
+  "domains": ["sensor", "switch", "button", "device_tracker", "select"],
+  "iot_class": "cloud_polling"
+}

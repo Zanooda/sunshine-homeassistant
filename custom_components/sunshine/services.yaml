@@ -1,0 +1,31 @@
+trigger_alarm:
+  name: Trigger Alarm
+  description: Trigger the scooter alarm for a specified duration
+  target:
+    entity:
+      integration: sunshine
+      domain: switch
+  fields:
+    duration:
+      name: Duration
+      description: Duration for the alarm (e.g., "5s", "10s", "30s")
+      required: true
+      example: "5s"
+      selector:
+        text:
+
+request_telemetry:
+  name: Request Telemetry
+  description: Request fresh telemetry data from the scooter
+  target:
+    entity:
+      integration: sunshine
+      domain: switch
+
+update_firmware:
+  name: Update Firmware
+  description: Initiate a firmware update on the scooter
+  target:
+    entity:
+      integration: sunshine
+      domain: switch
