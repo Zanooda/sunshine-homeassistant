@@ -15,28 +15,15 @@ _LOGGER = logging.getLogger(__name__)
 class SunshineAPI:
     """Sunshine API client."""
     
-    def __init__(self, token: str, base_url: str = DEFAULT_BASE_URL) -> None:
+    def __init__(self, token: str, base_url: str, session: aiohttp.ClientSession) -> None:
         """Initialize the API client."""
         self.token = token
         self.base_url = base_url.rstrip('/')
-        self._session: aiohttp.ClientSession | None = None
-    
-    @property
-    def session(self) -> aiohttp.ClientSession:
-        """Get or create aiohttp session."""
-        if self._session is None or self._session.closed:
-            self._session = aiohttp.ClientSession(
-                headers={
-                    "Authorization": f"Bearer {self.token}",
-                    "Content-Type": "application/json",
-                }
-            )
-        return self._session
-    
-    async def close(self) -> None:
-        """Close the session."""
-        if self._session and not self._session.closed:
-            await self._session.close()
+        self._session = session
+        self._headers = {
+            "Authorization": f"Bearer {self.token}",
+            "Content-Type": "application/json",
+        }
     
     async def test_authentication(self) -> bool:
         """Test if the authentication is valid."""
@@ -51,7 +38,7 @@ class SunshineAPI:
         """Make a request to the API."""
         url = f"{self.base_url}/api/v1{endpoint}"
         
-        async with self.session.request(method, url, **kwargs) as response:
+        async with self._session.request(method, url, headers=self._headers, **kwargs) as response:
             response.raise_for_status()
             return await response.json()
     

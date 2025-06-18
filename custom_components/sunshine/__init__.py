@@ -11,6 +11,7 @@ from homeassistant.const import ATTR_ENTITY_ID, Platform
 from homeassistant.core import HomeAssistant, ServiceCall
 from homeassistant.exceptions import ConfigEntryAuthFailed
 from homeassistant.helpers import config_validation as cv
+from homeassistant.helpers.aiohttp_client import async_get_clientsession
 
 from .api import SunshineAPI
 from .const import ATTR_DURATION, DOMAIN
@@ -31,7 +32,12 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Set up Sunshine from a config entry."""
     hass.data.setdefault(DOMAIN, {})
     
-    api = SunshineAPI(entry.data["token"], entry.data.get("base_url", "https://rescoot.org"))
+    session = async_get_clientsession(hass)
+    api = SunshineAPI(
+        entry.data["token"], 
+        entry.data.get("base_url", "https://rescoot.org"),
+        session
+    )
     
     try:
         await api.test_authentication()

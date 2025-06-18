@@ -10,6 +10,7 @@ from homeassistant import config_entries
 from homeassistant.const import CONF_TOKEN
 from homeassistant.data_entry_flow import FlowResult
 from homeassistant.helpers import config_validation as cv
+from homeassistant.helpers.aiohttp_client import async_get_clientsession
 
 from .api import SunshineAPI
 from .const import CONF_BASE_URL, DEFAULT_BASE_URL, DOMAIN
@@ -34,9 +35,11 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         errors: dict[str, str] = {}
         
         if user_input is not None:
+            session = async_get_clientsession(self.hass)
             api = SunshineAPI(
                 user_input[CONF_TOKEN],
-                user_input.get(CONF_BASE_URL, DEFAULT_BASE_URL)
+                user_input.get(CONF_BASE_URL, DEFAULT_BASE_URL),
+                session
             )
             
             try:

@@ -2,13 +2,13 @@
 from __future__ import annotations
 
 import logging
+from dataclasses import dataclass, field
 from typing import Any
 
 from homeassistant.components.select import SelectEntity, SelectEntityDescription
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
-from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
 from .const import (
     BLINKER_BOTH,
@@ -21,10 +21,11 @@ from .const import (
     SOUND_FIND_ME,
 )
 from .coordinator import SunshineDataUpdateCoordinator
+from .entity import SunshineEntity
 
 _LOGGER = logging.getLogger(__name__)
 
-
+@dataclass(frozen=True, kw_only=True)
 class SunshineSelectEntityDescription(SelectEntityDescription):
     """Describes Sunshine select entity."""
     
@@ -73,7 +74,7 @@ async def async_setup_entry(
     async_add_entities(entities)
 
 
-class SunshineSelect(CoordinatorEntity[SunshineDataUpdateCoordinator], SelectEntity):
+class SunshineSelect(SunshineEntity, SelectEntity):
     """Representation of a Sunshine Scooter select entity."""
     
     entity_description: SunshineSelectEntityDescription
@@ -86,9 +87,8 @@ class SunshineSelect(CoordinatorEntity[SunshineDataUpdateCoordinator], SelectEnt
         description: SunshineSelectEntityDescription,
     ) -> None:
         """Initialize the select entity."""
-        super().__init__(coordinator)
+        super().__init__(coordinator, scooter_id)
         self.api = api
-        self.scooter_id = scooter_id
         self.entity_description = description
         
         self._attr_unique_id = f"{scooter_id}_{description.key}"
@@ -96,30 +96,13 @@ class SunshineSelect(CoordinatorEntity[SunshineDataUpdateCoordinator], SelectEnt
         self._attr_current_option = description.options[0]
     
     @property
-    def device_info(self) -> dict[str, Any]:
-        """Return device info."""
-        scooter = self.coordinator.data[self.scooter_id]
-        return {
-            "identifiers": {(DOMAIN, self.scooter_id)},
-            "name": f"Scooter {scooter.get('vin', self.scooter_id)}",
-            "model": scooter.get("model", "Unknown"),
-            "manufacturer": "Sunshine",
-        }
-    
-    @property
-    def name(self) -> str:
-        """Return the name of the select entity."""
-        scooter = self.coordinator.data[self.scooter_id]
-        return f"{scooter.get('vin', self.scooter_id)} {self.entity_description.name}"
-    
-    @property
     def current_option(self) -> str | None:
         """Return the selected entity option."""
         # If the API provides current state, use it
-        scooter = self.coordinator.data[self.scooter_id]
-        state_key = f"{self.entity_description.key}_state"
-        if state_key in scooter:
-            return scooter[state_key]
+        if scooter := self.coordinator.data.get(self.scooter_id):
+            state_key = f"{self.entity_description.key}_state"
+            if state_key in scooter:
+                return scooter[state_key]
         return self._attr_current_option
     
     async def async_select_option(self, option: str) -> None:
@@ -137,4 +120,3 @@ class SunshineSelect(CoordinatorEntity[SunshineDataUpdateCoordinator], SelectEnt
                 self.scooter_id,
                 err
             )
-            raise

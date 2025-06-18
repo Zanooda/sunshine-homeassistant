@@ -2,13 +2,13 @@
 from __future__ import annotations
 
 import logging
+from dataclasses import dataclass, field
 from typing import Any, Callable
 
 from homeassistant.components.button import ButtonEntity, ButtonEntityDescription
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
-from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
 from .const import (
     BLINKER_BOTH,
@@ -21,10 +21,11 @@ from .const import (
     SOUND_FIND_ME,
 )
 from .coordinator import SunshineDataUpdateCoordinator
+from .entity import SunshineEntity
 
 _LOGGER = logging.getLogger(__name__)
 
-
+@dataclass(frozen=True, kw_only=True)
 class SunshineButtonEntityDescription(ButtonEntityDescription):
     """Describes Sunshine button entity."""
     
@@ -105,7 +106,7 @@ async def async_setup_entry(
     async_add_entities(entities)
 
 
-class SunshineButton(CoordinatorEntity[SunshineDataUpdateCoordinator], ButtonEntity):
+class SunshineButton(SunshineEntity, ButtonEntity):
     """Representation of a Sunshine Scooter button."""
     
     entity_description: SunshineButtonEntityDescription
@@ -118,29 +119,10 @@ class SunshineButton(CoordinatorEntity[SunshineDataUpdateCoordinator], ButtonEnt
         description: SunshineButtonEntityDescription,
     ) -> None:
         """Initialize the button."""
-        super().__init__(coordinator)
+        super().__init__(coordinator, scooter_id)
         self.api = api
-        self.scooter_id = scooter_id
         self.entity_description = description
-        
         self._attr_unique_id = f"{scooter_id}_{description.key}"
-    
-    @property
-    def device_info(self) -> dict[str, Any]:
-        """Return device info."""
-        scooter = self.coordinator.data[self.scooter_id]
-        return {
-            "identifiers": {(DOMAIN, self.scooter_id)},
-            "name": f"Scooter {scooter.get('vin', self.scooter_id)}",
-            "model": scooter.get("model", "Unknown"),
-            "manufacturer": "Sunshine",
-        }
-    
-    @property
-    def name(self) -> str:
-        """Return the name of the button."""
-        scooter = self.coordinator.data[self.scooter_id]
-        return f"{scooter.get('vin', self.scooter_id)} {self.entity_description.name}"
     
     async def async_press(self) -> None:
         """Handle the button press."""
@@ -155,4 +137,3 @@ class SunshineButton(CoordinatorEntity[SunshineDataUpdateCoordinator], ButtonEnt
                 self.scooter_id,
                 err
             )
-            raise
